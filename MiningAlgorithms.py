@@ -14,11 +14,24 @@ import time
 
 np.random.seed(0)
 
-connection = mysql.connect(
-    host="localhost",
-    user="root",
-    passwd="",
-    database="moviesdb")
+
+class Mining:
+    def __init__(self, connection) -> None:
+        super().__init__()
+        self.connection = connection
+
+    def get_recommended_movies(self, movie_id: str):
+        pass
+
+    def get_user_recommended_movies(self, customer_id: int):
+        pass
+
+    def get_movie_selectors(self, customer_id):
+        pass
+
+    def get_actor_friends(self, actor_id: str):
+        pass
+
 
 'Slow function'
 
@@ -27,14 +40,14 @@ def getRecommendedFilmsUsingApriori(customerID: int):
     start = time.time()
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    Cutomers_IDs = dbConn.get_all_customersIDs(cursor)
+
+    Cutomers_IDs = dbConn.get_all_customersIDs()
 
     'create orders list'
     orders = []
     bought_films_by_user = None
     for id in Cutomers_IDs:
-        customer_films = dbConn.get_theBought_films_by_customer(cursor, id)
+        customer_films = dbConn.get_theBought_films_by_customer(id)
         if id == customerID:
             bought_films_by_user = customer_films
         orders.append(customer_films)
@@ -86,8 +99,8 @@ def getRecommendedFilmsUsingApriori1(customerID: int):
     start = time.time()
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    all_customers = dbConn.get_all_customersIDs_with_films(cursor)
+
+    all_customers = dbConn.get_all_customersIDs_with_films()
 
     'create orders list'
     orders = []
@@ -145,13 +158,13 @@ def getRecommendedFilmsByFilmNameUsingApriori(film_name: str):
     start = time.time()
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    cutomers_IDs = dbConn.get_all_customersIDs(cursor)
+
+    cutomers_IDs = dbConn.get_all_customersIDs()
 
     'create orders list'
     orders = []
     for id in cutomers_IDs:
-        customer_films = dbConn.get_theBought_films_by_customer(cursor, id)
+        customer_films = dbConn.get_theBought_films_by_customer(id)
         orders.append(customer_films)
     print(time.time() - start)
     print('Begin Mining')
@@ -193,10 +206,9 @@ def getRecommendedFilmsByFilmNameUsingApriori(film_name: str):
         #     one_rule.append((list(rule_members[0])[0],list(rule_members[1])[0]))
         if len(list(rule_members[0])) == 1:
             left_side = list(rule_members[0])[0].strip()
-        if len(list(rule_members[0])) == 1 and left_side == film_name.strip()  and \
+        if len(list(rule_members[0])) == 1 and left_side == film_name.strip() and \
                 list(rule_members[1])[0] not in recommended_films:
-
-                recommended_films.append(list(rule_members[1])[0])
+            recommended_films.append(list(rule_members[1])[0])
 
     recommended_films = list(set(recommended_films))
     if recommended_films.__contains__(film_name.strip()):
@@ -208,13 +220,15 @@ def getRecommendedFilmsByFilmNameUsingApriori(film_name: str):
 
 
 'Fast function'
+
+
 def getRecommendedFilmsByFilmNameUsingApriori1(film_name: str):
     film_name = film_name.strip()
     start = time.time()
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    all_customers = dbConn.get_all_customersIDs_with_films(cursor)
+
+    all_customers = dbConn.get_all_customersIDs_with_films()
 
     'create orders list'
     orders = []
@@ -262,11 +276,9 @@ def getRecommendedFilmsByFilmNameUsingApriori1(film_name: str):
         left_side = ''
         if len(list(rule_members[0])) == 1:
             left_side = list(rule_members[0])[0].strip()
-        if len(list(rule_members[0])) == 1 and left_side == film_name.strip()  and \
+        if len(list(rule_members[0])) == 1 and left_side == film_name.strip() and \
                 list(rule_members[1])[0] not in recommended_films:
-
-
-                recommended_films.append(list(rule_members[1])[0])
+            recommended_films.append(list(rule_members[1])[0])
 
     recommended_films = list(set(recommended_films))
     if recommended_films.__contains__(film_name.strip()):
@@ -280,9 +292,9 @@ def getRecommendedFilmsByFilmNameUsingApriori1(film_name: str):
 def getRecommendedFilmsUsingClustering(customerID: int):
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    customers_features, customers_count, features_count = dbConn.get_customers_features(cursor)
-    customers_details = dbConn.get_customer_details(cursor, customerID)
+
+    customers_features, customers_count, features_count = dbConn.get_customers_features()
+    customers_details = dbConn.get_customer_details(customerID)
 
     customers_features.extend(customers_details)
     features_before_encode = np.array(customers_features).reshape((customers_count + 1, features_count))
@@ -316,7 +328,7 @@ def getRecommendedFilmsUsingClustering(customerID: int):
     cluster_customers = dictionary_of_clusters[customer_cluster[0]]
 
     'get the most frequent films in customer cluster '
-    frequent_films = dbConn.get_most_frequent_films_in_cluster(cursor, cluster_customers)
+    frequent_films = dbConn.get_most_frequent_films_in_cluster(cluster_customers)
 
     'sorted frequent films depending on count of it'
     'frequent_films is list of tuples like (film name,count of this film)'
@@ -329,9 +341,9 @@ def getRecommendedFilmsUsingClustering(customerID: int):
 def getMovieSelectorUsingClassification(customer_ID):
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    all_customers = dbConn.get_all_customers(cursor)
-    customers_details = dbConn.get_customer_details(cursor, customer_ID)
+
+    all_customers = dbConn.get_all_customers()
+    customers_details = dbConn.get_customer_details(customer_ID)
 
     'get the movieSelector column and delete it from customer details'
     movies_selectors = []
@@ -386,13 +398,13 @@ def getRecommendedActors(actor_name: str):
     start = time.time()
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    Cutomers_IDs = dbConn.get_all_customersIDs(cursor)
+
+    Cutomers_IDs = dbConn.get_all_customersIDs()
 
     orders = []
     bought_films_by_user = None
     for id in Cutomers_IDs:
-        customer_actors = dbConn.get_the_actors_of_customer(cursor, id)
+        customer_actors = dbConn.get_the_actors_of_customer(id)
         orders.append(customer_actors)
 
     print(time.time() - start)
@@ -430,9 +442,13 @@ def getRecommendedActors(actor_name: str):
     for rule in association_results:
         rule_members = rule[2][0]
         rules.append(Rule(list(rule_members[0]), list(rule_members[1]), rule_members[2]))
-        if len(list(rule_members[0])) == 1 and len(list(rule_members[1])) == 1 and list(rule_members[0])[0] == actor_name.strip() and not list(rule_members[1])[0] in recommended_actors:
-                recommended_actors.append(list(rule_members[1])[0])
-
+        if (
+                len(list(rule_members[0])) == 1 and
+                len(list(rule_members[1])) == 1 and
+                list(rule_members[0])[0] == actor_name.strip() and
+                not list(rule_members[1])[0] in recommended_actors
+        ):
+            recommended_actors.append(list(rule_members[1])[0])
 
     print(time.time() - start)
     if recommended_actors.__contains__(actor_name.strip()):
@@ -449,8 +465,8 @@ def getRecommendedActors1(actor_name: str):
     start = time.time()
     'open connection with database'
     dbConn = DataBaseConnection()
-    cursor = dbConn.Connection.cursor()
-    all_customers = dbConn.get_all_customersIDs_with_actors(cursor)
+
+    all_customers = dbConn.get_all_customersIDs_with_actors()
 
     'create orders list'
     orders = []
@@ -493,10 +509,9 @@ def getRecommendedActors1(actor_name: str):
     for rule in association_results:
         rule_members = rule[2][0]
         rules.append(Rule(list(rule_members[0]), list(rule_members[1]), rule_members[2]))
-        if len(list(rule_members[0])) == 1 and len(list(rule_members[1])) == 1 and list(rule_members[0])[0] == actor_name.strip() and not list(rule_members[1])[0] in recommended_actors:
-
-                recommended_actors.append(list(rule_members[1])[0])
-
+        if len(list(rule_members[0])) == 1 and len(list(rule_members[1])) == 1 and list(rule_members[0])[
+            0] == actor_name.strip() and not list(rule_members[1])[0] in recommended_actors:
+            recommended_actors.append(list(rule_members[1])[0])
 
     print(time.time() - start)
     if recommended_actors.__contains__(actor_name.strip()):
@@ -528,60 +543,19 @@ def parse_args():
 if __name__ == '__main__':
     # get args
     args = parse_args()
-    method = args.method
-    customer_id = args.customerID
-    movie_name = args.movie_name
-    actor_name = args.actor_name
-    top_n = args.top_n
+    # method = args.method
+    # customer_id = args.customerID
+    # movie_name = args.movie_name
+    # actor_name = args.actor_name
+    # top_n = args.top_n
 
-# print(getRecommendedFilmsUsingApriori(879061))
+    print(getRecommendedFilmsUsingApriori(879061))
 
-# print(getRecommendedFilmsUsingApriori1(879061))
-# print(getRecommendedFilmsByFilmNameUsingApriori("Godfather, The"))
-# print(getRecommendedFilmsByFilmNameUsingApriori1("Braveheart"))
-
-# print(getRecommendedFilmsUsingClustering(878908))
-# print( getMovieSelectorUsingClassification(878908))
-# print(getRecommendedActors("Duchovny, David"))
-print(getRecommendedActors1("Hopkins, Anthony"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # print(getRecommendedFilmsUsingApriori1(879061))
+    # print(getRecommendedFilmsByFilmNameUsingApriori("Godfather, The"))
+    # print(getRecommendedFilmsByFilmNameUsingApriori1("Braveheart"))
+    #
+    # print(getRecommendedFilmsUsingClustering(878908))
+    # print( getMovieSelectorUsingClassification(878908))
+    # print(getRecommendedActors("Duchovny, David"))
+    # print(getRecommendedActors1("Hopkins, Anthony"))
