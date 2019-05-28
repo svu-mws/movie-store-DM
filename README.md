@@ -13,6 +13,7 @@ Backend API
               "result": ["Indiana Jones and the Raiders of the Lost Ark","Lord of the Rings: The Fellowship of the Ring, The","Monty Python and the Holy Grail","Gladiator","Lethal Weapon","Star Wars","Saving Private Ryan","Godfather, Part II, The","Forrest Gump","Indiana Jones and the Temple of Doom","Godfather, The","Star Wars Episode V: Empire Strikes Back","Shawshank Redemption, The","Matrix, The","Caddyshack","Indiana Jones and the Last Crusade","Die Hard"]
             }
         ```
+        
     -   Get personalised recommendations:
 
         http://localhost:5000/user_movies/<user_id>
