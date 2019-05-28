@@ -167,9 +167,9 @@ class Mining:
         encoded_customer_details = features[features.shape[0] - 1]
         'remove the last element from features array'
         features = features[:features.shape[0] - 1]
+        movies_selectors = movies_selectors[:movies_selectors.shape[0] - 1]
 
         encoded_labels = le.fit_transform(movies_selectors)
-        encoded_labels = encoded_labels[: len(encoded_labels) - 1]
 
         X_train, X_test, y_train, y_test = train_test_split(features, encoded_labels, test_size=.25)
 
@@ -181,12 +181,10 @@ class Mining:
         SVC_classifier.fit(X_train, y_train)
 
         prediction = SVC_classifier.predict(encoded_customer_details.reshape((1, -1)))
-        predictions_dictionary = {}
-        for i in range(len(encoded_labels)):
-            label = encoded_labels[i]
-            predictions_dictionary[label] = movies_selectors[i]
 
-        movie_selector = predictions_dictionary[prediction[0]]
+
+        movie_selector_index = list(encoded_labels).index(prediction[0])
+        movie_selector = movies_selectors[movie_selector_index]
         return movie_selector
 
     def get_actor_friends(self, actor_name: str):
